@@ -18,6 +18,7 @@ const App: () => JSX.Element = () => {
   const [caption, setCaption] = useState<string | undefined>(
     "Powered by Deepgram"
   );
+  const [transcript, setTranscript] = useState<string | null>();
   const { connection, connectToDeepgram, connectionState } = useDeepgram();
   const { setupMicrophone, microphone, startMicrophone, microphoneState } =
     useMicrophone();
@@ -32,7 +33,7 @@ const App: () => JSX.Element = () => {
   useEffect(() => {
     if (microphoneState === MicrophoneState.Ready) {
       connectToDeepgram({
-        model: "nova-2",
+        model: "nova-3",
         interim_results: true,
         smart_format: true,
         filler_words: true,
@@ -62,6 +63,11 @@ const App: () => JSX.Element = () => {
       if (thisCaption !== "") {
         console.log('thisCaption !== ""', thisCaption);
         setCaption(thisCaption);
+        const transcript = data.channel.alternatives[0].transcript;
+        const is_final = data.is_final;
+        if(transcript && is_final) {
+          setTranscript(transcript);
+        }
       }
 
       if (isFinal && speechFinal) {
@@ -119,8 +125,21 @@ const App: () => JSX.Element = () => {
             {/* height 100% minus 8rem */}
             <div className="relative w-full h-full">
               {microphone && <Visualizer microphone={microphone} />}
-              <div className="absolute bottom-[8rem]  inset-x-0 max-w-4xl mx-auto text-center">
-                {caption && <span className="bg-black/70 p-8">{caption}</span>}
+              <div className="absolute bottom-[12rem]  inset-x-0 max-w-4xl mx-auto text-center">
+                {caption && (
+                  <span className="bg-black/70 p-8 flex flex-col">
+                    <span className="font-bold mb-2">Live Transcription:</span>
+                    <span>{caption}</span>
+                  </span>
+                )}
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center max-w-4xl mx-auto text-center">
+                {transcript && (
+                  <span className="bg-black/70 p-8 flex flex-col">
+                    <span className="font-bold mb-2">Final Transcription:</span>
+                    <span>{transcript}</span>
+                  </span>
+                )}
               </div>
             </div>
           </div>
