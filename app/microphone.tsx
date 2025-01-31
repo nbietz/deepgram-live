@@ -79,7 +79,7 @@ export default function Microphone() {
       console.log("connecting to deepgram");
       const deepgram = createClient(apiKey?.key ?? "");
       const connection = deepgram.listen.live({
-        model: "nova-2",
+        model: "nova-3",
         interim_results: true,
         smart_format: true,
       });
