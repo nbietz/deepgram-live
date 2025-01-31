@@ -24,6 +24,7 @@ export default function Microphone() {
   const [microphone, setMicrophone] = useState<MediaRecorder | null>();
   const [userMedia, setUserMedia] = useState<MediaStream | null>();
   const [caption, setCaption] = useState<string | null>();
+  const [transcript, setTranscript] = useState<string | null>();
 
   const toggleMicrophone = useCallback(async () => {
     if (microphone && userMedia) {
@@ -78,7 +79,7 @@ export default function Microphone() {
       console.log("connecting to deepgram");
       const deepgram = createClient(apiKey?.key ?? "");
       const connection = deepgram.listen.live({
-        model: "nova",
+        model: "nova-2",
         interim_results: true,
         smart_format: true,
       });
@@ -102,6 +103,11 @@ export default function Microphone() {
           .join(" ");
         if (caption !== "") {
           setCaption(caption);
+        }
+        const transcript = data.channel.alternatives[0].transcript;
+        const is_final = data.is_final;
+        if(transcript && is_final) {
+          setTranscript(transcript);
         }
       });
 
@@ -174,6 +180,11 @@ export default function Microphone() {
           {caption && micOpen
             ? caption
             : "** Realtime transcription by Deepgram **"}
+        </div>
+        <div className="mt-20 p-6 text-xl text-center">
+          {transcript && micOpen
+            ? transcript
+            : ""}
         </div>
       </div>
       <div
